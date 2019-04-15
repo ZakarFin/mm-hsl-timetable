@@ -76,7 +76,7 @@ function processBusData(json, minutesFrom = 0) {
 			let datVal = new Date(
 				(stopTime.serviceDay + stopTime.realtimeDeparture) * 1000
 			);
-			if (datVal.getTime() + (minutesFrom * 60 * 1000) < new Date().getTime()) {
+			if (datVal.getTime() < new Date().getTime() + (minutesFrom * 60 * 1000)) {
 				return;
 			}
 			const date = moment(datVal);
