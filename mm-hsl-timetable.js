@@ -101,12 +101,11 @@ Module.register("mm-hsl-timetable",{
 
 		var large = document.createElement("div");
 		large.className = "light small " + this.config.timetableClass;
-		var html = "";
-		this.getStops().forEach((stop) => {
+		var htmlElements = this.getStops().map((stop) => {
 			var timetable = this.getTimeTable(stop);
-			html = html + this.getTable(timetable);
+			return this.getTable(timetable);
 		});
-		large.innerHTML = html;
+		large.innerHTML = htmlElements.join("");
 		wrapper.appendChild(large);
 
 		return wrapper;
@@ -117,14 +116,13 @@ Module.register("mm-hsl-timetable",{
 		}
 		// tr class="normal"
 		var table = "<table><tr><th colspan=2>" + data.name + "</th></tr>";
-		data.busses.map(item => {
-			table = table +
-				"<tr><td>" + item.line +
+		var rows = data.busses.map(item => {
+			return "<tr><td>" + item.line +
 				"</td><td>" + item.until +
 				" (" + item.time + ")" +
 				"</td></tr>";
 		});
 
-		return table + "</table>";
+		return table + rows.join("") + "</table>";
 	}
 });
