@@ -12,19 +12,18 @@ You will need to check the "solmutunnus" from https://www.avoindata.fi/data/fi/d
 
 ## Using the module
 
-To use this module, add it to the modules array in the `config/config.js` file:
+1) Clone this repository under `MagicMirror/modules` folder
+2) Add to the modules array in the `MagicMirror/config/config.js` file:
 ````javascript
-modules: [
-	{
-		module: "mm-hsl-timetable",
-		position: "top_right",
-		header: "Bus schedule",
-		config: {
-			stops: [1130113],
-			busCount: 5
-		}
-    }
-]
+modules: [{
+	module: "mm-hsl-timetable",
+	position: "top_right",
+	header: "Bus schedule",
+	config: {
+		stops: [1130113],
+		busCount: 5
+	}
+}]
 ````
 
 ## Configuration options
