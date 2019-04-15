@@ -34,3 +34,11 @@ The following properties can be configured:
 | ---------------------------- | -----------
 | `busCount`                   | Amount of busses to show/stop
 | `stops`                 	   | The stop numbers to show as an array
+
+Stops can also be an object with:
+
+| Key                          | Description
+| ---------------------------- | -----------
+| `id`                         | Stop number
+| `name`                 	   | Optional name to override one from API
+| `minutesFrom`                | Minutes to skip from now (if the stop is not near)
