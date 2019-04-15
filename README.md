@@ -1,4 +1,5 @@
-# Module: Timetable for HSL data (Finland)
+# Module for [MagicMirror](https://magicmirror.builders/): Timetable for HSL data (Finland)
+
 The `mm-hsl-timetable` fetches bus timetable data from HSL (Helsinki region Finland)and shows the timetables for configured stops.
 
 You will need to check the "solmutunnus" from https://www.avoindata.fi/data/fi/dataset/hsl-n-joukkoliikenteen-pysakit and add the number of the bus stop you want to show in the config stops-array. Or query the gtfsId from https://digitransit.fi/en/developers/apis/1-routing-api/stops/#query-stops-by-name-or-number.
