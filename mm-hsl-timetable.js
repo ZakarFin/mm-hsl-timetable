@@ -37,11 +37,6 @@ Module.register("mm-hsl-timetable",{
 		timetableClass: "timetable"
 	},
 	timeTable: {},
-	// create a variable for the first upcoming calendar event. Used if no location is specified.
-	firstEvent: false,
-
-	// create a variable to hold the location name based on the API result.
-	fetchedLocationName: "",
 
 	notificationReceived: function (notification, payload, sender) {
 		if (notification === "DOM_OBJECTS_CREATED") {
@@ -57,22 +52,26 @@ Module.register("mm-hsl-timetable",{
 			this.updateDom();
 		}
 	},
-	// Define required scripts.
-	getScripts: function() {
-		return ["moment.js"];
-	},
 	getStops() {
-		return Object.keys(this.timeTable);
+		return Object.keys(this.timeTable) || [];
 	},
 	getTimeTable(stop) {
-		/*
+		// stop might be object with id and name
+		var id = stop.id || stop;
+		if (typeof id !== "number" && typeof id !== "string") {
+			return null;
+		}
+		var details = this.timeTable[id];
+		if (!details) {
+			return null;
+		}
+		/* details.busses is an array of:
 		{ line: '224',
 		info: '',
 		time: '12:51',
 		until: 'in 13 hours',
 		ts: 1554371460000 },
 		*/
-		var details = this.timeTable[stop] || { busses: []};
 		details.busses = details.busses.slice(0, this.config.busCount);
 		return details;
 	},
@@ -113,6 +112,9 @@ Module.register("mm-hsl-timetable",{
 		return wrapper;
 	},
 	getTable: function (data) {
+		if (!data) {
+			return "<span>Couldn't get schedule</span>";
+		}
 		// tr class="normal"
 		var table = "<table><tr><th colspan=2>" + data.name + "</th></tr>";
 		data.busses.map(item => {

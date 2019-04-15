@@ -5,15 +5,13 @@ const request = require("request");
 var NodeHelper = require("node_helper");
 
 function getSchedule(baseUrl, stop, successCb, errorCB) {
-	var self = this;
-
 	const options = {
 		method: "POST",
 		url: baseUrl,
 		headers: {
 			"Content-Type": "application/graphql"
 		},
-		body: getHSLPayload(stop, moment().format("YYYYMMDD"))
+		body: getHSLPayload(stop.id || stop, moment().format("YYYYMMDD"))
 	};
 	request(options, (err, res, body) => {
 		if (err) {
@@ -28,8 +26,8 @@ function getSchedule(baseUrl, stop, successCb, errorCB) {
 				return;
 			}
 			var response = {
-				stop,
-				name: data.name,
+				stop: stop.id || stop,
+				name: stop.name || data.name,
 				busses: processBusData(data.stoptimesForServiceDate)
 			};
 			successCb(response);
