@@ -4,9 +4,8 @@ var moment = require("moment");
 const request = require("request");
 var NodeHelper = require("node_helper");
 
-function getSchedule (baseUrl, stop, successCb, errorCB) {
+function getSchedule(baseUrl, stop, successCb, errorCB) {
 	var self = this;
-
 
 	const options = {
 		method: "POST",
@@ -17,26 +16,30 @@ function getSchedule (baseUrl, stop, successCb, errorCB) {
 		body: getHSLPayload(stop, moment().format("YYYYMMDD"))
 	};
 	request(options, (err, res, body) => {
-	  if (err) {
-		  errorCB(err);
-		  return;
-	  }
-	  var json = JSON.parse(body);
-		const data = json.data.stop;
-		if (!data) {
-			console.error(json);
-			throw new Error("Didn't get data");
+		if (err) {
+			errorCB(err);
+			return;
 		}
-	  var response = {
-		  stop,
-		  name: data.name,
-		  busses: processBusData(data.stoptimesForServiceDate)
-	  };
-	  successCb(response);
+		try {
+			var json = JSON.parse(body);
+			const data = json.data.stop;
+			if (!data) {
+				errorCB(err);
+				return;
+			}
+			var response = {
+				stop,
+				name: data.name,
+				busses: processBusData(data.stoptimesForServiceDate)
+			};
+			successCb(response);
+		} catch (e) {
+			errorCB(e);
+		}
 	});
 }
 
-function getHSLPayload (stop, date) {
+function getHSLPayload(stop, date) {
 	return `{
       stop(id: "HSL:${stop}") {
         name
@@ -66,13 +69,15 @@ function getHSLPayload (stop, date) {
   }`;
 }
 
-function processBusData (json) {
+function processBusData(json) {
 	let times = [];
 	json.forEach(value => {
 		const line = value.pattern.route.shortName;
 		value.stoptimes.forEach(stopTime => {
 			// times in seconds so multiple by 1000 for ms
-			let datVal = new Date((stopTime.serviceDay + stopTime.realtimeDeparture) * 1000);
+			let datVal = new Date(
+				(stopTime.serviceDay + stopTime.realtimeDeparture) * 1000
+			);
 			if (datVal.getTime() < new Date().getTime()) {
 				return;
 			}
@@ -92,10 +97,11 @@ function processBusData (json) {
 }
 
 module.exports = NodeHelper.create({
-
 	config: {},
 	updateTimer: null,
-	start: function () {},
+	start: function () {
+		moment.locale(config.language || "fi");
+	},
 
 	socketNotificationReceived: function (notification, payload) {
 		if (notification === "CONFIG") {
@@ -106,30 +112,31 @@ module.exports = NodeHelper.create({
 
 	fetchTimetables() {
 		var self = this;
-		this.config.stops.forEach((stop) => {
-			getSchedule(this.config.apiURL, stop,
-				(data) => {
+		this.config.stops.forEach(stop => {
+			getSchedule(
+				this.config.apiURL,
+				stop,
+				data => {
 					self.sendSocketNotification("TIMETABLE", data);
 					self.scheduleNextFetch(this.config.updateInterval);
 				},
-				(err) => {
-					console.log(err);
+				err => {
+					console.error(err);
 					self.scheduleNextFetch(this.config.retryDelay);
 				}
 			);
 		});
 	},
 
-	scheduleNextFetch: function(delay) {
+	scheduleNextFetch: function (delay) {
 		if (typeof delay === "undefined") {
-			delay = 60 * 1000
+			delay = 60 * 1000;
 		}
 
 		var self = this;
 		clearTimeout(this.updateTimer);
-		this.updateTimer = setTimeout(function() {
+		this.updateTimer = setTimeout(function () {
 			self.fetchTimetables();
 		}, delay);
 	}
-
 });

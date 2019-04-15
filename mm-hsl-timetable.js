@@ -101,7 +101,7 @@ Module.register("mm-hsl-timetable",{
 		}
 
 		var large = document.createElement("div");
-		large.className = "light " + this.config.timetableClass;
+		large.className = "light small " + this.config.timetableClass;
 		var html = "";
 		this.getStops().forEach((stop) => {
 			var timetable = this.getTimeTable(stop);
@@ -113,10 +113,14 @@ Module.register("mm-hsl-timetable",{
 		return wrapper;
 	},
 	getTable: function (data) {
+		// tr class="normal"
 		var table = "<table><tr><th colspan=2>" + data.name + "</th></tr>";
 		data.busses.map(item => {
 			table = table +
-				"<tr><td>" + item.line + "</td><td>" + item.until + "</td></tr>";
+				"<tr><td>" + item.line +
+				"</td><td>" + item.until +
+				" (" + item.time + ")" +
+				"</td></tr>";
 		});
 
 		return table + "</table>";
