@@ -28,7 +28,7 @@ function getSchedule(baseUrl, stop, successCb, errorCB) {
 			var response = {
 				stop: stop.id || stop,
 				name: stop.name || data.name,
-				busses: processBusData(data.stoptimesForServiceDate)
+				busses: processBusData(data.stoptimesForServiceDate, stop.minutesFrom)
 			};
 			successCb(response);
 		} catch (e) {
@@ -67,7 +67,7 @@ function getHSLPayload(stop, date) {
   }`;
 }
 
-function processBusData(json) {
+function processBusData(json, minutesFrom = 0) {
 	let times = [];
 	json.forEach(value => {
 		const line = value.pattern.route.shortName;
@@ -76,7 +76,7 @@ function processBusData(json) {
 			let datVal = new Date(
 				(stopTime.serviceDay + stopTime.realtimeDeparture) * 1000
 			);
-			if (datVal.getTime() < new Date().getTime()) {
+			if (datVal.getTime() + (minutesFrom * 60 * 1000) < new Date().getTime()) {
 				return;
 			}
 			const date = moment(datVal);
@@ -91,7 +91,7 @@ function processBusData(json) {
 		});
 	});
 	times.sort((a, b) => a.ts - b.ts);
-	return times.slice(0, this.count);
+	return times;
 }
 
 module.exports = NodeHelper.create({
