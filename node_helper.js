@@ -12,7 +12,7 @@ function getSchedule(baseUrl, stop, successCb, errorCB) {
 		body: getHSLPayload(stop.id || stop, moment().format("YYYYMMDD"))
 	};
 	request(options, (err, res, body) => {
-		if (err || body.indexOf('<') === 0) {
+		if (err || body.indexOf("<") === 0) {
 			errorCB(err);
 			return;
 		}
