@@ -1,5 +1,3 @@
-var fs = require("fs");
-var path = require("path");
 var moment = require("moment");
 const request = require("request");
 var NodeHelper = require("node_helper");
@@ -20,6 +18,10 @@ function getSchedule(baseUrl, stop, successCb, errorCB) {
 		}
 		try {
 			var json = JSON.parse(body);
+			if (!json.data) {
+				errorCB(err);
+				return;
+			}
 			const data = json.data.stop;
 			if (!data) {
 				errorCB(err);
@@ -69,7 +71,13 @@ function getHSLPayload(stop, date) {
 
 function processBusData(json, minutesFrom = 0) {
 	let times = [];
+	if (!json || json.length < 1) {
+		return times;
+	}
 	json.forEach(value => {
+		if (value && !value.stoptimes) {
+			return;
+		}
 		const line = value.pattern.route.shortName;
 		value.stoptimes.forEach(stopTime => {
 			// times in seconds so multiple by 1000 for ms
