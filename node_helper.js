@@ -1,30 +1,30 @@
 var moment = require("moment");
-const request = require("request");
+const fetch = require("node-fetch");
 var NodeHelper = require("node_helper");
 
 function getSchedule(baseUrl, stop, successCb, errorCB) {
-	const options = {
-		method: "POST",
-		url: baseUrl,
-		headers: {
-			"Content-Type": "application/graphql"
-		},
-		body: getHSLPayload(stop.id || stop, moment().format("YYYYMMDD"))
+	const nodeVersion = Number(process.version.match(/^v(\d+\.\d+)/)[1]);
+	const headers = {
+		"Content-Type": "application/graphql",
+		"User-Agent": "Mozilla/5.0 (Node.js " + nodeVersion + ") MagicMirror/" + global.version,
+		"Cache-Control": "max-age=0, no-cache, no-store, must-revalidate",
+		Pragma: "no-cache"
 	};
-	request(options, (err, res, body) => {
-		if (err || body.indexOf("<") === 0) {
-			errorCB(err);
-			return;
-		}
-		try {
-			var json = JSON.parse(body);
+
+	fetch(baseUrl, {
+        method: 'POST',
+        body:    getHSLPayload(stop.id || stop, moment().format("YYYYMMDD")),
+		headers: headers })
+		.then(NodeHelper.checkFetchStatus)
+		.then(response => response.json())
+		.then(json => {
 			if (!json.data) {
-				errorCB(err);
+				errorCB('No data');
 				return;
 			}
 			const data = json.data.stop;
 			if (!data) {
-				errorCB(err);
+				errorCB('No stop data');
 				return;
 			}
 			var response = {
@@ -33,10 +33,10 @@ function getSchedule(baseUrl, stop, successCb, errorCB) {
 				busses: processBusData(data.stoptimesForServiceDate, stop.minutesFrom)
 			};
 			successCb(response);
-		} catch (e) {
-			errorCB(e);
-		}
-	});
+		})
+		.catch((error) => {
+			errorCB(error);
+		});
 }
 
 function getHSLPayload(stop, date) {
