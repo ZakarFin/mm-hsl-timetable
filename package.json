@@ -1,7 +1,7 @@
 {
   "name": "mm-hsl-timetable",
   "version": "1.0.0",
-  "description": "Module for MagicMirror² to display a public transport schedules in Finland using digitransit.fi API.",
+  "description": "Module for MagicMirror² to display public transport schedules in Finland using digitransit.fi API.",
   "main": "mm-hsl-timetable.js",
   "repository": {
     "type": "git",
