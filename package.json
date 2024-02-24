@@ -1,0 +1,22 @@
+{
+  "name": "mm-hsl-timetable",
+  "version": "1.0.0",
+  "description": "Module for MagicMirror² to display a public transport schedules in Finland using digitransit.fi API.",
+  "main": "mm-hsl-timetable.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zakarfin/mm-hsl-timetable.git"
+  },
+  "keywords": [
+    "magic mirror",
+    "smart mirror",
+    "public transport",
+    "module"
+  ],
+  "author": "Zakarfin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Zakarfin/mm-hsl-timetable/issues"
+  },
+  "homepage": "https://github.com/Zakarfin/mm-hsl-timetable#readme"
+}
