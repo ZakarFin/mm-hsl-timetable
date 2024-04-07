@@ -1,14 +1,16 @@
 var moment = require("moment");
-const fetch = require("node-fetch");
+// uncomment node-fetch for older MM versions
+// const fetch = require("node-fetch");
 var NodeHelper = require("node_helper");
 
-function getSchedule(baseUrl, stop, successCb, errorCB) {
+function getSchedule(baseUrl, apikey, stop, successCb, errorCB) {
     const nodeVersion = Number(process.version.match(/^v(\d+\.\d+)/)[1]);
     const headers = {
         "Content-Type": "application/graphql",
         "User-Agent": "Mozilla/5.0 (Node.js " + nodeVersion + ") MagicMirror/" + global.version,
         "Cache-Control": "max-age=0, no-cache, no-store, must-revalidate",
-        Pragma: "no-cache"
+        Pragma: "no-cache",
+        "digitransit-subscription-key": apikey
     };
 
     fetch(baseUrl, {
@@ -84,7 +86,7 @@ function processBusData(json, minutesFrom = 0) {
             let datVal = new Date(
                 (stopTime.serviceDay + stopTime.realtimeDeparture) * 1000
             );
-            if (datVal.getTime() < new Date().getTime() + (minutesFrom * 60 * 1000)) {
+            if (datVal.getTime() < new Date(Date.now()).getTime() + (minutesFrom * 60 * 1000)) {
                 return;
             }
             const date = moment(datVal);
@@ -121,6 +123,7 @@ module.exports = NodeHelper.create({
         this.config.stops.forEach(stop => {
             getSchedule(
                 this.config.apiURL,
+                this.config.apikey,
                 stop,
                 data => {
                     self.sendSocketNotification("TIMETABLE", data);

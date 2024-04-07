@@ -4,6 +4,8 @@ The `mm-hsl-timetable` module fetches bus timetable data from HSL (Helsinki regi
 
 You will need to check the "solmutunnus" from https://www.avoindata.fi/data/fi/dataset/hsl-n-joukkoliikenteen-pysakit and add the number of the bus stop you want to show in the config stops-array. Or query the gtfsId from https://digitransit.fi/en/developers/apis/1-routing-api/stops/#query-stops-by-name-or-number.
 
+Note! You will need to register at https://portal-api.digitransit.fi to get an APIkey to use this.
+
 ## Screenshot
 
 - HSL Timetable screenshot
@@ -16,13 +18,14 @@ You will need to check the "solmutunnus" from https://www.avoindata.fi/data/fi/d
 2) Add to the modules array in the `MagicMirror/config/config.js` file:
 ````javascript
 modules: [{
-	module: "mm-hsl-timetable",
-	position: "top_right",
-	header: "Bus schedule",
-	config: {
-		stops: [1130113],
-		busCount: 5
-	}
+  module: "mm-hsl-timetable",
+  position: "top_right",
+  header: "Bus schedule",
+  config: {
+    stops: [1130113],
+    busCount: 5,
+    apikey: "get one from https://portal-api.digitransit.fi"
+  }
 }]
 ````
 
@@ -35,11 +38,12 @@ The following properties can be configured:
 | ---------------------------- | -----------
 | `busCount`                   | Amount of busses to show/stop
 | `stops`                 	   | The stop numbers to show as an array
+| `apikey`                 	   | The digitransit API currently requires an APIkey to be used. You can get one for free by registering at https://portal-api.digitransit.fi
 
 Stops can also be an object with:
 
 | Key                          | Description
 | ---------------------------- | -----------
 | `id`                         | Stop number
-| `name`                 	   | Optional name to override one from API
+| `name`                 	     | Optional name to override one from API
 | `minutesFrom`                | Minutes to skip from now (if the stop is not near)

@@ -1,6 +1,6 @@
 /* global Module */
 
-/* Magic Mirror
+/* MagicMirror²
  * Module: mm-hsl-timetable
  *
  * Add this to config.js:
