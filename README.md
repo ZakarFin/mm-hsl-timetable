@@ -47,3 +47,32 @@ Stops can also be an object with:
 | `id`                         | Stop number
 | `name`                 	     | Optional name to override one from API
 | `minutesFrom`                | Minutes to skip from now (if the stop is not near)
+
+## For debugging the underlying API
+
+v2 api:
+- https://api.digitransit.fi/graphiql/hsl/v2/gtfs/v1?query=%257B%250A%2520%2520stop%28id%253A%2520%2522HSL%253Axxx%2522%29%2520%257B%250A%2520%2520%2520%2520name%250A%2520%2520%2520%2520%2520%2520stoptimesWithoutPatterns%2520%257B%250A%2520%2520%2520%2520%2520%2520realtimeArrival%250A%2520%2520%2520%2520%2520%2520departureDelay%250A%2520%2520%2520%2520%2520%2520realtime%250A%2520%2520%2520%2520%2520%2520realtimeState%250A%2520%2520%2520%2520%2520%2520serviceDay%250A%2520%2520%2520%2520%2520%2520headsign%250A%2520%2520%2520%2520%2520%2520trip%2520%257B%250A%2520%2520%2520%2520%2520%2520%2520%2520route%2520%257B%250A%2520%2520%2520%2520%2520%2520%2520%2520%2520%2520shortName%250A%2520%2520%2520%2520%2520%2520%2520%2520%257D%250A%2520%2520%2520%2520%2520%2520%257D%250A%2520%2520%2520%2520%257D%250A%2520%2520%257D%2520%2520%250A%257D%250A%250A%250A
+- https://digitransit.fi/en/developers/apis/1-routing-api/stops/
+
+Example query:
+```
+{
+  stop(id: "HSL:xxx") {
+    name
+      stoptimesWithoutPatterns {
+      realtimeArrival
+      departureDelay
+      realtime
+      realtimeState
+      serviceDay
+      headsign
+      trip {
+        route {
+          shortName
+        }
+      }
+    }
+  }
+}
+```
+

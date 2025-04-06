@@ -31,8 +31,11 @@ Module.register("mm-hsl-timetable",{
 		updateInterval: 50 * 1000, // every 50 seconds
 		//updateInterval: 2 * 1000, // every 2 seconds
 		retryDelay: 2500,
-
-		apiURL: "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql",
+		// https://digitransit.fi/en/developers/apis/1-routing-api/
+		// v2
+		apiURL: "https://api.digitransit.fi/routing/v2/hsl/gtfs/v1",
+		// v1
+		// apiURL: "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql",
 
 		timetableClass: "timetable"
 	},
