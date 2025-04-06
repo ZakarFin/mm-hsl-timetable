@@ -2,37 +2,44 @@ var moment = require("moment");
 // uncomment node-fetch for older MM versions
 // const fetch = require("node-fetch");
 var NodeHelper = require("node_helper");
+// uncomment/comment the version import to try previous API version vs new one
+// const DigiTrAPI = require("./hslAPIv1");
+const DigiTrAPI = require("./hslAPIv2");
 
-function getSchedule(baseUrl, apikey, stop, successCb, errorCB) {
+function getSchedule(baseUrl, apikey, stop, successCb, errorCB, busCount) {
     const nodeVersion = Number(process.version.match(/^v(\d+\.\d+)/)[1]);
     const headers = {
         "Content-Type": "application/graphql",
-        "User-Agent": "Mozilla/5.0 (Node.js " + nodeVersion + ") MagicMirror/" + global.version,
+        "User-Agent": `Mozilla/5.0 (Node.js ${nodeVersion}) MagicMirror/${global.version}`,
         "Cache-Control": "max-age=0, no-cache, no-store, must-revalidate",
         Pragma: "no-cache",
-        "digitransit-subscription-key": apikey
+        "digitransit-subscription-key": apikey,
     };
 
     fetch(baseUrl, {
-        method: 'POST',
-        body:    getHSLPayload(stop.id || stop, moment().format("YYYYMMDD")),
-        headers: headers })
+        method: "POST",
+        body: DigiTrAPI.getHSLPayload(stop.id || stop, moment().format("YYYYMMDD"), busCount),
+        headers: headers,
+    })
         .then(NodeHelper.checkFetchStatus)
-        .then(response => response.json())
-        .then(json => {
+        .then((response) => response.json())
+        .then((json) => {
             if (!json.data) {
-                errorCB('No data');
+                errorCB("No data");
                 return;
             }
             const data = json.data.stop;
             if (!data) {
-                errorCB('No stop data');
+                errorCB("No stop data");
                 return;
             }
             var response = {
                 stop: stop.id || stop,
                 name: stop.name || data.name,
-                busses: processBusData(data.stoptimesForServiceDate, stop.minutesFrom)
+                busses: DigiTrAPI.processBusData(
+                    data,
+                    stop.minutesFrom
+                ),
             };
             successCb(response);
         })
@@ -41,68 +48,8 @@ function getSchedule(baseUrl, apikey, stop, successCb, errorCB) {
         });
 }
 
-function getHSLPayload(stop, date) {
-    return `{
-      stop(id: "HSL:${stop}") {
-        name
-        lat
-        lon
-        url
-        stoptimesForServiceDate(date:"${date}") {
-          pattern {
-            name
-            route {
-              shortName
-            }
-          }
-          stoptimes {
-            serviceDay
-            scheduledDeparture
-            realtimeDeparture
-            trip {
-              serviceId
-              alerts {
-                alertHeaderText
-              }
-            }
-          }
-        }
-      }
-  }`;
-}
 
-function processBusData(json, minutesFrom = 0) {
-    let times = [];
-    if (!json || json.length < 1) {
-        return times;
-    }
-    json.forEach(value => {
-        if (value && !value.stoptimes) {
-            return;
-        }
-        const line = value.pattern.route.shortName;
-        value.stoptimes.forEach(stopTime => {
-            // times in seconds so multiple by 1000 for ms
-            let datVal = new Date(
-                (stopTime.serviceDay + stopTime.realtimeDeparture) * 1000
-            );
-            if (datVal.getTime() < new Date(Date.now()).getTime() + (minutesFrom * 60 * 1000)) {
-                return;
-            }
-            const date = moment(datVal);
-            const bus = {
-                line,
-                info: stopTime.trip.alerts.join(),
-                time: date.format("H:mm"),
-                until: date.fromNow(),
-                ts: datVal.getTime()
-            };
-            times.push(bus);
-        });
-    });
-    times.sort((a, b) => a.ts - b.ts);
-    return times;
-}
+
 
 module.exports = NodeHelper.create({
     config: {},
@@ -120,19 +67,20 @@ module.exports = NodeHelper.create({
 
     fetchTimetables() {
         var self = this;
-        this.config.stops.forEach(stop => {
+        this.config.stops.forEach((stop) => {
             getSchedule(
                 this.config.apiURL,
                 this.config.apikey,
                 stop,
-                data => {
+                (data) => {
                     self.sendSocketNotification("TIMETABLE", data);
                     self.scheduleNextFetch(this.config.updateInterval);
                 },
-                err => {
+                (err) => {
                     console.error(err);
                     self.scheduleNextFetch(this.config.retryDelay);
-                }
+                },
+				this.config.busCount
             );
         });
     },
@@ -147,5 +95,5 @@ module.exports = NodeHelper.create({
         this.updateTimer = setTimeout(function () {
             self.fetchTimetables();
         }, delay);
-    }
+    },
 });
